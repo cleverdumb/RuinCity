@@ -1,0 +1,52 @@
+<html>
+    <head>
+        <title>Ruin city login</title>
+    </head>
+    <body>
+        <h1>Login</h1>
+        <input placeholder='username' id='u' value='a'>
+        <br>
+        <input placeholder='password' id='p' value='1'>
+        <br>
+        <button id='submit'>Login</button>
+        <p style='color: red' id='errorMsg'></p>
+        <script>
+            const errorMsg = document.getElementById('errorMsg')
+
+            document.getElementById('submit').onclick = ()=>{
+                let http = new XMLHttpRequest();
+                let url = `${window.location.origin}/login`;
+                let params = `user=${document.getElementById('u').value}&pass=${document.getElementById('p').value}`
+
+                http.open('POST', url, true);
+
+                http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+
+                http.onreadystatechange = ()=>{
+                    if (http.readyState == 4 && http.status == 200) {
+                        res = JSON.parse(http.responseText);
+                        if (res.success) {
+                            errorMsg.innerHTML = 'Success! Should redirect now.';
+                            window.location.replace(`${window.location.origin}/home.html`);
+                        }
+                        else {
+                            switch (res.reason) {
+                                case 0:
+                                    errorMsg.innerHTML = 'Username and password must not be empty.';
+                                    break;
+                                case 1:
+                                    errorMsg.innerHTML = 'Username or password is wrong. Please try again or sign up.';
+                                    break;
+                                default:
+                                    errorMsg.innerHTML = 'Unexpected error, please try again.';
+                                    break;
+                            }
+                        }
+                    }
+                }
+
+                http.send(params);
+            }
+        </script>
+    </body>
+</html>

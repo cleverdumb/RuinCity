@@ -1,0 +1,57 @@
+<html>
+    <head>
+        <title>Ruin city signup</title>
+    </head>
+    <body>
+        <h1>Sign up</h1>
+        <p>The username must be between 4 and 20 characters, and password between 8 and 30 characters (inclusive)</p>
+        <input placeholder='username' id='u' value='a'>
+        <br>
+        <input placeholder='password' id='p' value='1'>
+        <br>
+        <button id='submit'>Signup</button>
+        <p style='color: red' id='errorMsg'></p>
+        <script>
+            const errorMsg = document.getElementById('errorMsg')
+
+            document.getElementById('submit').onclick = ()=>{
+                let http = new XMLHttpRequest();
+                let url = `${window.location.origin}/signup`;
+                let params = `user=${document.getElementById('u').value}&pass=${document.getElementById('p').value}`
+
+                http.open('POST', url, true);
+
+                http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+
+                http.onreadystatechange = ()=>{
+                    if (http.readyState == 4 && http.status == 200) {
+                        res = JSON.parse(http.responseText);
+                        if (res.success) {
+                            console.log('Success');
+                            errorMsg.innerHTML = 'Success! Should redirect now to login page.';
+                            window.location.replace(`${window.location.origin}/login.html`);
+                        }
+                        else {
+                            switch (res.reason) {
+                                case 0:
+                                    errorMsg.innerHTML = 'Username and password must not be empty.';
+                                    break;
+                                case 1:
+                                    errorMsg.innerHTML = 'That is the wrong length.';
+                                    break;
+                                case 2:
+                                    errorMsg.innerHTML = 'The username is used. Please choose another one.';
+                                    break;
+                                default:
+                                    errorMsg.innerHTML = 'Unexpected error, please try again.';
+                                    break;
+                            }
+                        }
+                    }
+                }
+
+                http.send(params);
+            }
+        </script>
+    </body>
+</html>
