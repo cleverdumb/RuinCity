@@ -10,13 +10,27 @@
         <br>
         <button id='submit'>Login</button>
         <p style='color: red' id='errorMsg'></p>
+        <a href='./signup.html'>Sign up</a>
         <script>
             const errorMsg = document.getElementById('errorMsg')
 
-            document.getElementById('submit').onclick = ()=>{
+            function login(clicked) {
                 let http = new XMLHttpRequest();
                 let url = `${window.location.origin}/login`;
-                let params = `user=${document.getElementById('u').value}&pass=${document.getElementById('p').value}`
+                let params = '';
+                if (localStorage.getItem('session') && (Date.now()-localStorage.getItem('time'))<24*60*60*1000) {
+                    // console.log('1')
+                    params = `session=${localStorage.getItem('session')}`
+                }
+                else {
+                    if (clicked) {
+                        // console.log('2')
+                        params = `user=${document.getElementById('u').value}&pass=${document.getElementById('p').value}`
+                    }
+                    else {
+                        return;
+                    }
+                }
 
                 http.open('POST', url, true);
 
@@ -27,6 +41,8 @@
                         res = JSON.parse(http.responseText);
                         if (res.success) {
                             errorMsg.innerHTML = 'Success! Should redirect now.';
+                            localStorage.setItem('session', res.session)
+                            localStorage.setItem('time', Date.now())
                             window.location.replace(`${window.location.origin}/home.html`);
                         }
                         else {
@@ -47,6 +63,12 @@
 
                 http.send(params);
             }
+
+            document.getElementById('submit').onclick = ()=>{
+                login(true);
+            }
+
+            login(false);
         </script>
     </body>
 </html>
