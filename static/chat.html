@@ -1,0 +1,104 @@
+<html>
+    <head>
+        <title>Ruin city chat</title>
+    </head>
+    <style>
+        #container {
+            width: 400px;
+            height: 400px;
+            border: black solid 1px;
+            overflow-x: scroll;
+        }
+
+        p.chat {
+            margin-top: 1px;
+            margin-bottom: 1px;
+            margin-left: 3px;
+            margin-right: 3px;
+            white-space: nowrap;
+        }
+    </style>
+    <body>
+        <button id='refresh'>Refresh chat</button>
+        <div id="container"></div>
+        <input id='chat' placeholder='What you want to send.'>
+        <button id='send'>Send</button>
+        <p style='color: red' id='errorMsg'></p>
+        <script>
+            const errorMsg = document.getElementById('errorMsg');
+            const container = document.getElementById('container');
+
+            function refresh() {
+                let http = new XMLHttpRequest();
+                let url = `${window.location.origin}/getChat`;
+
+                http.open('GET', url, true);
+
+                // http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+
+                http.onreadystatechange = ()=>{
+                    if (http.readyState == 4 && http.status == 200) {
+                        container.innerHTML = '';
+                        res = JSON.parse(http.responseText);
+                        res.forEach(x=>{
+                            container.innerHTML += `<p title='${Date(x.time)}' class='chat'>${x.user}: ${x.val}</p>`
+                        })
+                        container.scrollTop = container.scrollHeight;
+                    }
+                }
+
+                http.send()
+            }
+
+            document.getElementById('send').onclick = () => {
+                let http = new XMLHttpRequest();
+                let url = `${window.location.origin}/chat`;
+                let params = `val=${document.getElementById('chat').value}`
+
+                if (localStorage.getItem('session') && localStorage.getItem('session') && (Date.now()-localStorage.getItem('time'))<24*60*60*1000) {
+                    params += `&session=${localStorage.getItem('session')}`
+                }
+                else {
+                    document.getElementById('errorMsg').innerHTML = `Your session has expired. Redirecting to ${`${window.location.origin}/login.html`} to relogin.`
+                    // console.log('case 1')
+                    window.location.replace(`${window.location.origin}/login.html`)
+                }
+
+                http.open('POST', url, true);
+
+                http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+
+                http.onreadystatechange = ()=>{
+                    if (http.readyState == 4 && http.status == 200) {
+                        res = JSON.parse(http.responseText);
+                        if (res.success) {
+                            errorMsg.innerHTML = 'Sent'
+                            refresh();
+                        }
+                        else {
+                            switch (res.reason) {
+                                case 0:
+                                    errorMsg.innerHTML = 'Chat message cannot be empty.';
+                                    break;
+                                case 1:
+                                    errorMsg.innerHTML = `Session invalid. Redirecting to ${`${window.location.origin}/login.html`} to relogin.`
+                                    window.location.replace(`${window.location.origin}/login.html`);
+                                    // console.log('case 2')
+                                    break;
+                                default:
+                                    errorMsg.innerHTML = 'Unexpected error. Please try again.'
+                                    break;
+                            }
+                        }
+                    }
+                }
+
+                http.send(params);
+            }
+
+            document.getElementById('refresh').onclick = () => {
+                refresh();
+            }
+        </script>
+    </body>
+</html>

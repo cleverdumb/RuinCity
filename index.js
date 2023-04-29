@@ -20,6 +20,8 @@ db.exec(`create table if not exists session (
 
 // db.exec(`insert into account (user, pass) values ('a', '1')`)
 
+chatRecord = [];
+
 app.use(express.static('static'))
 app.use(bodyParser.urlencoded({extended:true}))
 
@@ -117,6 +119,21 @@ function getSession(user, pass, res, ses) {
     }
 }
 
+function fromSes(ses, cb) {
+    // console.log(ses);
+    searchAll('session', {session: ses}, (rows)=>{
+        // console.log(rows);
+        if (rows.length >= 1) {
+            let row = rows[0];
+            // console.log(row);
+            cb(row.id);
+        }
+        else {
+            cb(null);
+        }
+    })
+}
+
 /*
 Error codes:
 0: Empty user or pass
@@ -196,4 +213,48 @@ app.post('/signup', (req, res)=>{
             return;
         }
     })
+})
+
+/*
+Error codes:
+0: Empty chat value
+1: Invalid session
+*/
+
+app.post('/chat', (req,res) => {
+    let body = req.body;
+    // console.log(body);
+    let ses = body.session;
+    fromSes(ses, (id)=> {
+        if (id) {
+            if (body.val.length > 0) {
+                searchAll('account', {id: id}, (rows)=>{
+                    if (rows.length >= 1) {
+                        let row = rows[0];
+                        let user = row.user;
+                        chatRecord.push({val: body.val, user: user, time: Date.now()})
+                        if (chatRecord.length > 200) {
+                            chatRecord.shift()
+                        }
+                        // console.log(chatRecord);
+                        res.send(JSON.stringify({success: true}))
+                    }
+                    else {
+                        res.send(JSON.stringify({success: false, reason: 100}))
+                    }
+                })
+            }
+            else {
+                res.send(JSON.stringify({success: false, reason: 0}))
+            }
+        }
+        else {
+            res.send(JSON.stringify({success:false, reason: 1}))
+        }
+    })
+})
+
+app.get('/getChat',(req, res)=>{
+    // console.log('get chat')
+    res.send(JSON.stringify(chatRecord));
 })
