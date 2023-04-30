@@ -8,6 +8,8 @@ const port = process.env.PORT || 2050;
 
 const db = new sqlite3.Database('./db/data.db')
 
+db.exec('pragma foreign_keys = 0')
+
 db.exec(`create table if not exists account (
     id integer unique not null primary key autoincrement,
     user varchar(40) not null unique,
@@ -16,7 +18,12 @@ db.exec(`create table if not exists account (
 db.exec(`create table if not exists session (
     id integer not null unique,
     session varchar(12) not null unique,
-    foreign key (id) references account (id))`)
+    foreign key (id) references account (id) on delete cascade on update cascade)`)
+
+db.exec(`create table if not exists profile (
+    id integer not null unique,
+    money integer not null,
+    foreign key (id) references account (id) on delete cascade on update cascade)`)
 
 // db.exec(`insert into account (user, pass) values ('a', '1')`)
 
@@ -203,9 +210,14 @@ app.post('/signup', (req, res)=>{
     searchAll('account', {user: body.user}, (rows)=>{
         if (rows.length <= 0) {
             insertRow('account', {user: body.user, pass: body.pass}, ()=>{
-                res.send(JSON.stringify({success: true}))
-                console.log(`Signup - (user: ${body.user}, pass: ${body.pass})`.green)
-                return;
+                searchAll('account', {user: body.user}, (rows)=>{
+                    let id = rows[0].id;
+                    insertRow('profile', {id: id, money: 0}, ()=>{
+                        res.send(JSON.stringify({success: true}))
+                        console.log(`Signup - (user: ${body.user}, pass: ${body.pass})`.green)
+                        return;
+                    })
+                })
             })
         }
         else {
@@ -257,4 +269,29 @@ app.post('/chat', (req,res) => {
 app.get('/getChat',(req, res)=>{
     // console.log('get chat')
     res.send(JSON.stringify(chatRecord));
+})
+
+/*
+Error code:
+0: Invalid session
+*/
+
+app.post('/getHomeData', (req, res)=>{
+    let session = req.body.session;
+    fromSes(session, (id)=>{
+        if (id) {
+            searchAll('profile', {id: id}, (rows)=>{
+                if (rows.length >= 1) {
+                    let row = rows[0];
+                    res.send(JSON.stringify({success: true, data: row}));
+                }
+                else {
+                    res.send(JSON.stringify({success: false, reason: 100}));
+                }
+            })
+        }
+        else {
+            res.send(JSON.stringify({success: false, reason: 0}))
+        }
+    })
 })

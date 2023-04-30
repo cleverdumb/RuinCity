@@ -4,6 +4,24 @@
     </head>
     <body>
         <h1>Home page.</h1>
+        <p id='moneyDisp'></p>
+        <button id='refresh'>Refresh data</button>
         <a href='./chat.html'>Global chat room</a>
+        <script src='getData.js'></script>
+        <script>
+            function id(id) {
+                return document.getElementById(id);
+            }
+
+            function refresh() {
+                getData((data)=>{
+                    id('moneyDisp').innerHTML = `Money: ${data.money}`;
+                });
+            }
+
+            refresh();
+
+            id('refresh').onclick = refresh;
+        </script>
     </body>
 </html>

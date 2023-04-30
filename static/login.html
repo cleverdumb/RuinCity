@@ -19,12 +19,10 @@
                 let url = `${window.location.origin}/login`;
                 let params = '';
                 if (localStorage.getItem('session') && (Date.now()-localStorage.getItem('time'))<24*60*60*1000) {
-                    // console.log('1')
                     params = `session=${localStorage.getItem('session')}`
                 }
                 else {
                     if (clicked) {
-                        // console.log('2')
                         params = `user=${document.getElementById('u').value}&pass=${document.getElementById('p').value}`
                     }
                     else {
@@ -46,16 +44,18 @@
                             window.location.replace(`${window.location.origin}/home.html`);
                         }
                         else {
-                            switch (res.reason) {
-                                case 0:
-                                    errorMsg.innerHTML = 'Username and password must not be empty.';
-                                    break;
-                                case 1:
-                                    errorMsg.innerHTML = 'Username or password is wrong. Please try again or sign up.';
-                                    break;
-                                default:
-                                    errorMsg.innerHTML = 'Unexpected error, please try again.';
-                                    break;
+                            if (clicked) {
+                                switch (res.reason) {
+                                    case 0:
+                                        errorMsg.innerHTML = 'Username and password must not be empty.';
+                                        break;
+                                    case 1:
+                                        errorMsg.innerHTML = 'Username or password is wrong. Please try again or sign up.';
+                                        break;
+                                    default:
+                                        errorMsg.innerHTML = 'Unexpected error, please try again.';
+                                        break;
+                                }
                             }
                         }
                     }

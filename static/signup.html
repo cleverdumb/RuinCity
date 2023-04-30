@@ -28,7 +28,6 @@
                     if (http.readyState == 4 && http.status == 200) {
                         res = JSON.parse(http.responseText);
                         if (res.success) {
-                            console.log('Success');
                             errorMsg.innerHTML = 'Success! Should redirect now to login page.';
                             window.location.replace(`${window.location.origin}/login.html`);
                         }
