@@ -1,0 +1,22 @@
+{
+    "crimes": [
+        {
+            "xpReq": 0,
+            "failProb": 0.1,
+            "xpGain": 1,
+            "cd": 5,
+            "moneyGain": 10
+        },
+        {
+            "xpReq": 15,
+            "failProb": 0.1,
+            "xpGain": 3,
+            "cd": 6,
+            "moneyGain": 50
+        }
+    ],
+    "crimeNames": [
+        "pickpocket",
+        "shoplifting"
+    ]
+}

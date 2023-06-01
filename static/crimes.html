@@ -15,7 +15,8 @@
         <div id='dispSec'></div>
         <div id='timer' timerId='none'></div>
         <br>
-        <button id='basic'>Basic crime</button>
+        <button class='crimes' crimeType='pickpocket'>Pickpocket</button>
+        <button class='crimes' crimeType='shoplifting'>Shoplifting</button>
         <p id='errorMsg' style='color:red'></p>
         <script src='getData.js'></script>
         <script src='request.js'></script>
@@ -30,29 +31,42 @@
                 }
             }
 
-            document.getElementById('basic').onclick = () => {
-                request('/crime', 'type=basic', true, 'POST', (res)=>{
-                    if (res.success) {
-                        console.log('success');
-                        getData('dispSec');
-                        document.getElementById('errorMsg').innerText = 'Success';
-                        setTimer({id: 'timer', timeMs: res.rem, delayMs: 0, finished: false});
-                    }
-                    else {
-                        switch (res.reason) {
-                            case 0:
-                                window.location.replace(`${window.location.origin}/login`);
-                                break;
-                            case 1:
-                                document.getElementById('errorMsg').innerText = 'Still on cooldown';
-                                break;
-                            default:
-                                alert('Unexpected error occured, please refresh to try again.');
-                                break;
+            [...document.getElementsByClassName('crimes')].forEach(x=>{
+                x.onclick = () => {
+                    request('/crime', `type=${x.getAttribute('crimeType')}`, true, 'POST', (res)=>{
+                        if (res.success) {
+                            console.log('success');
+                            getData('dispSec');
+                            document.getElementById('errorMsg').innerText = 'Success';
+                            setTimer({id: 'timer', timeMs: res.rem, delayMs: 0, finished: false});
                         }
-                    }
-                })
-            }
+                        else {
+                            switch (res.reason) {
+                                case 0:
+                                    window.location.replace(`${window.location.origin}/login`);
+                                    break;
+                                case 1:
+                                    document.getElementById('errorMsg').innerText = 'Still on cooldown';
+                                    break;
+                                case 2:
+                                    document.getElementById('errorMsg').innerText = 'That crime type does not exist';
+                                    break;
+                                case 3:
+                                    document.getElementById('errorMsg').innerText = 'You failed, you should try some easier crimes for some experience first.';
+                                    setTimer({id: 'timer', timeMs: res.rem, delayMs: 0, finished: false});
+                                    break;
+                                case 4:
+                                    document.getElementById('errorMsg').innerText = 'You failed, you should try again.';
+                                    setTimer({id: 'timer', timeMs: res.rem, delayMs: 0, finished: false});
+                                    break;
+                                default:
+                                    alert('Unexpected error occured, please refresh to try again.');
+                                    break;
+                            }
+                        }
+                    })
+                }
+            })
         </script>
     </body>
 </html>

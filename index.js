@@ -8,6 +8,10 @@ const port = process.env.PORT || 2050;
 
 const db = new sqlite3.Database('./db/data.db')
 
+// const con = require('./../constants.json');
+const fs = require('fs');
+const con = JSON.parse(fs.readFileSync('./constants.json', 'utf-8'));
+
 db.exec('pragma foreign_keys = ON')
 
 db.exec(`create table if not exists account (
@@ -39,6 +43,11 @@ db.exec(`create table if not exists cTimers (
     id integer not null unique,
     prev integer not null,
     timer integer not null,
+    foreign key (id) references account (id) on delete cascade on update cascade)`)
+
+db.exec(`create table if not exists crimeXp (
+    id integer not null unique,
+    crimeXp integer not null,
     foreign key (id) references account (id) on delete cascade on update cascade)`)
 
 // db.exec(`insert into account (user, pass) values ('a', '1')`)
@@ -235,12 +244,16 @@ app.post('/signup', (req, res)=>{
                     let id = rows[0].id;
                     insertRow('profile', {id: id, money: 0, maxHealth: 200, health: 200, maxEnergy: 100, energy: 100, str: 10, def: 10, dex: 10, spd: 10, sth: 10, per: 10}, ()=>{
                         insertRow('cTimers', {id: id, timer: Date.now(), prev: 0}, ()=>{
-                            res.send(JSON.stringify({success: true}));
-                            console.log(`Signup - (user: ${body.user}, pass: ${body.pass})`.green);
+                            insertRow('crimeXp', {id: id, crimeXp: 0}, ()=>{
+                                res.send(JSON.stringify({success: true}));
+                                console.log(`Signup - (user: ${body.user}, pass: ${body.pass})`.green);
+                                return;
+                            })
                             return;
                         })
                         return;
                     })
+                    return;
                 })
             })
         }
@@ -324,10 +337,20 @@ app.post('/getHomeData', (req, res)=>{
 Error codes:
 0: Invalid session
 1: Still on cooldown
+2: Crime does not exist
+3: Not enough xp
+4: Failed
 */
 
 app.post('/crime', (req, res)=>{
     let type = req.body.type;
+    console.log(`type: ${type}`);
+    if (!con.crimeNames.includes(type)) {
+        res.send(JSON.stringify({success: false, reason: 2}))
+        return;
+    }
+    let crimeId = con.crimeNames.indexOf(type);
+    console.log(`crimeId: ${crimeId}`)
     fromSes(req.body.session, (id)=>{
         if (id) {
             searchAll('cTimers', {id: id}, rows=>{
@@ -335,13 +358,36 @@ app.post('/crime', (req, res)=>{
                     let row = rows[0];
                     let readyTime = row.timer;
                     if (readyTime<=Date.now()) {
-                        db.run(`update profile set money=((select money from profile where id=?)+${10}) where id=?`, [id, id], err=>{
-                            if (err) throw err;
-                            db.run(`update cTimers set timer=${Date.now()+5000}, prev=${Date.now()} where id=?`, [id], (err)=>{
-                                if (err) throw err;
-                                res.send(JSON.stringify({success: true, rem: 5000}));
-                            })
-                            return;
+                        searchAll('crimeXp', {id: id}, rows=>{
+                            let xp = rows[0].crimeXp;
+                            console.log(`xp: ${xp}`);
+                            let crimeData = con.crimes[crimeId];
+                            if (xp < crimeData.xpReq) {
+                                db.run(`update cTimers set timer=${Date.now()+crimeData.cd*1000}, prev=${Date.now()} where id=?`, [id], (err)=>{
+                                    if (err) throw err;
+                                    res.send(JSON.stringify({success: false, reason: 3, rem: crimeData.cd*1000}));
+                                })
+                            }
+                            else {
+                                if (Math.random()<crimeData.failProb) {
+                                    db.run(`update cTimers set timer=${Date.now()+crimeData.cd*1000}, prev=${Date.now()} where id=?`, [id], (err)=>{
+                                        if (err) throw err;
+                                        res.send(JSON.stringify({success: false, reason: 4, rem: crimeData.cd*1000}));
+                                    })
+                                }
+                                else {
+                                    db.run(`update profile set money=((select money from profile where id=?)+${crimeData.moneyGain}) where id=?`, [id, id], err=>{
+                                        if (err) throw err;
+                                        db.run(`update cTimers set timer=${Date.now()+crimeData.cd*1000}, prev=${Date.now()} where id=?`, [id], (err)=>{
+                                            db.run(`update crimeXp set crimeXp = crimeXp+${crimeData.xpGain} where id=?`, [id], (err)=>{
+                                                if (err) throw err;
+                                                res.send(JSON.stringify({success: true, rem: crimeData.cd*1000}));
+                                            })
+                                        })
+                                        return;
+                                    })
+                                }
+                            }
                         })
                     }
                     else {
