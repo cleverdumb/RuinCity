@@ -1,0 +1,58 @@
+<html>
+    <head>
+        <title>Ruin city crimes</title>
+    </head>
+    <style>
+        #timer {
+            width: 100px;
+            height: 30px;
+            border: 1px black solid;
+        }
+    </style>
+    <link rel='stylesheet' href='progressAnim.css'>
+    <body>
+        <h1>Crimes</h1>
+        <div id='dispSec'></div>
+        <div id='timer' timerId='none'></div>
+        <br>
+        <button id='basic'>Basic crime</button>
+        <p id='errorMsg' style='color:red'></p>
+        <script src='getData.js'></script>
+        <script src='request.js'></script>
+        <script src='setTimer.js'></script>
+        <script>
+            getData('dispSec');
+
+            document.body.onload = ()=>{
+                let ret = getTimer('cTimers', 'timer');
+                if (ret) {
+                    document.getElementById('errorMsg').innerHTML = ret;
+                }
+            }
+
+            document.getElementById('basic').onclick = () => {
+                request('/crime', 'type=basic', true, 'POST', (res)=>{
+                    if (res.success) {
+                        console.log('success');
+                        getData('dispSec');
+                        document.getElementById('errorMsg').innerText = 'Success';
+                        setTimer({id: 'timer', timeMs: res.rem, delayMs: 0, finished: false});
+                    }
+                    else {
+                        switch (res.reason) {
+                            case 0:
+                                window.location.replace(`${window.location.origin}/login`);
+                                break;
+                            case 1:
+                                document.getElementById('errorMsg').innerText = 'Still on cooldown';
+                                break;
+                            default:
+                                alert('Unexpected error occured, please refresh to try again.');
+                                break;
+                        }
+                    }
+                })
+            }
+        </script>
+    </body>
+</html>

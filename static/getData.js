@@ -1,4 +1,4 @@
-function getData(cb) {
+function getData(sec) {
     let http = new XMLHttpRequest();
     let url = `${window.location.origin}/getHomeData`;
     let params = ''
@@ -17,7 +17,8 @@ function getData(cb) {
         if (http.readyState == 4 && http.status == 200) {
             let res = JSON.parse(http.responseText);
             if (res.success) {
-                cb(res.data);
+                document.getElementById(sec).innerHTML = `
+                <p>Money: ${res.data.money}</p>`
             }
             else {
                 switch (res.reason) {
@@ -26,6 +27,7 @@ function getData(cb) {
                         break;
                     default:
                         alert('Unexpected error occured, please refresh to try again.')
+                        break;
                 }
             }
         }

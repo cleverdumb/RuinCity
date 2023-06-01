@@ -8,7 +8,7 @@ const port = process.env.PORT || 2050;
 
 const db = new sqlite3.Database('./db/data.db')
 
-db.exec('pragma foreign_keys = 0')
+db.exec('pragma foreign_keys = ON')
 
 db.exec(`create table if not exists account (
     id integer unique not null primary key autoincrement,
@@ -23,6 +23,12 @@ db.exec(`create table if not exists session (
 db.exec(`create table if not exists profile (
     id integer not null unique,
     money integer not null,
+    foreign key (id) references account (id) on delete cascade on update cascade)`)
+
+db.exec(`create table if not exists cTimers (
+    id integer not null unique,
+    prev integer not null,
+    timer integer not null,
     foreign key (id) references account (id) on delete cascade on update cascade)`)
 
 // db.exec(`insert into account (user, pass) values ('a', '1')`)
@@ -127,18 +133,23 @@ function getSession(user, pass, res, ses) {
 }
 
 function fromSes(ses, cb) {
-    // console.log(ses);
-    searchAll('session', {session: ses}, (rows)=>{
-        // console.log(rows);
-        if (rows.length >= 1) {
-            let row = rows[0];
-            // console.log(row);
-            cb(row.id);
-        }
-        else {
-            cb(null);
-        }
-    })
+    if (!ses) {
+        cb(null);
+    }
+    else {
+        // console.log(ses);
+        searchAll('session', {session: ses}, (rows)=>{
+            // console.log(rows);
+            if (rows.length >= 1) {
+                let row = rows[0];
+                // console.log(row);
+                cb(row.id);
+            }
+            else {
+                cb(null);
+            }
+        })
+    }
 }
 
 /*
@@ -213,8 +224,11 @@ app.post('/signup', (req, res)=>{
                 searchAll('account', {user: body.user}, (rows)=>{
                     let id = rows[0].id;
                     insertRow('profile', {id: id, money: 0}, ()=>{
-                        res.send(JSON.stringify({success: true}))
-                        console.log(`Signup - (user: ${body.user}, pass: ${body.pass})`.green)
+                        insertRow('cTimers', {id: id, timer: Date.now(), prev: 0}, ()=>{
+                            res.send(JSON.stringify({success: true}));
+                            console.log(`Signup - (user: ${body.user}, pass: ${body.pass})`.green);
+                            return;
+                        })
                         return;
                     })
                 })
@@ -272,7 +286,7 @@ app.get('/getChat',(req, res)=>{
 })
 
 /*
-Error code:
+Error codes:
 0: Invalid session
 */
 
@@ -292,6 +306,77 @@ app.post('/getHomeData', (req, res)=>{
         }
         else {
             res.send(JSON.stringify({success: false, reason: 0}))
+        }
+    })
+})
+
+/*
+Error codes:
+0: Invalid session
+1: Still on cooldown
+*/
+
+app.post('/crime', (req, res)=>{
+    let type = req.body.type;
+    fromSes(req.body.session, (id)=>{
+        if (id) {
+            searchAll('cTimers', {id: id}, rows=>{
+                if (rows.length > 0) {
+                    let row = rows[0];
+                    let readyTime = row.timer;
+                    if (readyTime<=Date.now()) {
+                        db.run(`update profile set money=((select money from profile where id=?)+${10}) where id=?`, [id, id], err=>{
+                            if (err) throw err;
+                            db.run(`update cTimers set timer=${Date.now()+5000}, prev=${Date.now()} where id=?`, [id], (err)=>{
+                                if (err) throw err;
+                                res.send(JSON.stringify({success: true, rem: 5000}));
+                            })
+                            return;
+                        })
+                    }
+                    else {
+                        res.send(JSON.stringify({success: false, reason: 1, rem: readyTime-Date.now()}))
+                        return;
+                    }
+                }
+            })
+        }
+        else {
+            res.send(JSON.stringify({success:false, reason: 0}))
+            return;
+        }
+    })
+})
+
+/*
+Error codes:
+0: Not enough info provided
+1: Session not valid
+*/
+
+app.post('/getTimer', (req, res)=>{
+    let body = req.body;
+    let {session, dbName} = body;
+    if (!session || !dbName) {
+        res.send(JSON.stringify({success: false, reason: 0}))
+    }
+    fromSes(session, id=>{
+        if (id) {
+            searchAll(dbName, {id: id}, rows=>{
+                if (rows.length > 0) {
+                    let {prev, timer} = rows[0];
+                    let now = Date.now();
+                    if (now >= timer) {
+                        res.send(JSON.stringify({success: true, result: 'READY'}));
+                    }
+                    else {
+                        res.send(JSON.stringify({success: true, result: {prev: prev, timer: timer}}));
+                    }
+                }
+            })
+        }
+        else {
+            res.send(JSON.stringify({success: false, reason: 1}))
         }
     })
 })

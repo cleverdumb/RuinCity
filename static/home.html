@@ -4,24 +4,20 @@
     </head>
     <body>
         <h1>Home page.</h1>
-        <p id='moneyDisp'></p>
+        <!-- <p id='moneyDisp'></p> -->
+        <div id='dispSec'></div>
         <button id='refresh'>Refresh data</button>
         <a href='./chat.html'>Global chat room</a>
+        <a href='./crimes.html'>Crimes</a>
         <script src='getData.js'></script>
         <script>
-            function id(id) {
-                return document.getElementById(id);
-            }
-
             function refresh() {
-                getData((data)=>{
-                    id('moneyDisp').innerHTML = `Money: ${data.money}`;
-                });
+                getData('dispSec');
             }
 
             refresh();
 
-            id('refresh').onclick = refresh;
+            document.getElementById('refresh').onclick = refresh;
         </script>
     </body>
 </html>

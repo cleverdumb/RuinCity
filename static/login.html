@@ -18,7 +18,8 @@
                 let http = new XMLHttpRequest();
                 let url = `${window.location.origin}/login`;
                 let params = '';
-                if (localStorage.getItem('session') && (Date.now()-localStorage.getItem('time'))<24*60*60*1000) {
+                if (localStorage.getItem('session') && (Date.now()-localStorage.getItem('time'))<7200000) {
+                    // 2 days
                     params = `session=${localStorage.getItem('session')}`
                 }
                 else {
@@ -37,6 +38,7 @@
                 http.onreadystatechange = ()=>{
                     if (http.readyState == 4 && http.status == 200) {
                         res = JSON.parse(http.responseText);
+                        console.log(res);
                         if (res.success) {
                             errorMsg.innerHTML = 'Success! Should redirect now.';
                             localStorage.setItem('session', res.session)

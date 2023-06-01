@@ -1,0 +1,11 @@
+.progressBarAnim.insideBar {
+    animation-name: progress;
+    animation-timing-function: linear;
+    width: 0%;
+    height: 100%
+}
+
+@keyframes progress {
+    from {background-color: red; width: 0%}
+    to {background-color: green; width: 100%}
+}
