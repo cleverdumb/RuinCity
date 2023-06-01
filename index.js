@@ -27,6 +27,12 @@ db.exec(`create table if not exists profile (
     maxHealth integer not null,
     energy integer not null,
     maxEnergy integer not null,
+    str integer not null,
+    def integer not null,
+    spd integer not null,
+    dex integer not null,
+    sth integer not null,
+    per integer not null,
     foreign key (id) references account (id) on delete cascade on update cascade)`)
 
 db.exec(`create table if not exists cTimers (
@@ -227,7 +233,7 @@ app.post('/signup', (req, res)=>{
             insertRow('account', {user: body.user, pass: body.pass}, ()=>{
                 searchAll('account', {user: body.user}, (rows)=>{
                     let id = rows[0].id;
-                    insertRow('profile', {id: id, money: 0, maxHealth: 200, health: 200, maxEnergy: 100, energy: 100}, ()=>{
+                    insertRow('profile', {id: id, money: 0, maxHealth: 200, health: 200, maxEnergy: 100, energy: 100, str: 10, def: 10, dex: 10, spd: 10, sth: 10, per: 10}, ()=>{
                         insertRow('cTimers', {id: id, timer: Date.now(), prev: 0}, ()=>{
                             res.send(JSON.stringify({success: true}));
                             console.log(`Signup - (user: ${body.user}, pass: ${body.pass})`.green);

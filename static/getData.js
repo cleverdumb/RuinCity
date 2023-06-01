@@ -1,4 +1,4 @@
-function getData(sec) {
+function getData(sec, deep=false) {
     let http = new XMLHttpRequest();
     let url = `${window.location.origin}/getHomeData`;
     let params = ''
@@ -17,17 +17,41 @@ function getData(sec) {
         if (http.readyState == 4 && http.status == 200) {
             let res = JSON.parse(http.responseText);
             if (res.success) {
-                document.getElementById(sec).innerHTML = `
-                <p>Money: ${res.data.money}</p>
-                <div style='width: 200px; height: 10px; border: 1px solid black;'>
-                    <div style='width: ${200*res.data.energy/res.data.maxEnergy}px; height: 100%; background-color: #5E9625'></div>
-                </div>
-                <div>${res.data.energy}/${res.data.maxEnergy}</div>
-                <div style='width: 200px; height: 10px; border: 1px solid black;'>
-                    <div style='width: ${200*res.data.health/res.data.maxHealth}px; height: 100%; background-color: #505BD3'></div>
-                </div>
-                <div>${res.data.health}/${res.data.maxHealth}</div>
-                `
+                if (!deep) {
+                    document.getElementById(sec).innerHTML = `
+                    <p>Money: ${res.data.money}</p>
+                    <div style='width: 200px; height: 10px; border: 1px solid black;'>
+                        <div style='width: ${200*res.data.energy/res.data.maxEnergy}px; height: 100%; background-color: #5E9625'></div>
+                    </div>
+                    <div>${res.data.energy}/${res.data.maxEnergy}</div>
+                    <div style='width: 200px; height: 10px; border: 1px solid black;'>
+                        <div style='width: ${200*res.data.health/res.data.maxHealth}px; height: 100%; background-color: #505BD3'></div>
+                    </div>
+                    <div>${res.data.health}/${res.data.maxHealth}</div>
+                    `
+                }
+                else {
+                    document.getElementById(sec).innerHTML = `
+                    <p>Money: ${res.data.money}</p>
+                    <div style='width: 200px; height: 10px; border: 1px solid black;'>
+                        <div style='width: ${200*res.data.energy/res.data.maxEnergy}px; height: 100%; background-color: #5E9625'></div>
+                    </div>
+                    <div>${res.data.energy}/${res.data.maxEnergy}</div>
+                    <div style='width: 200px; height: 10px; border: 1px solid black;'>
+                        <div style='width: ${200*res.data.health/res.data.maxHealth}px; height: 100%; background-color: #505BD3'></div>
+                    </div>
+                    <div>${res.data.health}/${res.data.maxHealth}</div>
+                    <p>Battle stats</p>
+                    <ul>
+                        <li>Strength: ${res.data.str}</li>
+                        <li>Defense: ${res.data.def}</li>
+                        <li>Speed: ${res.data.spd}</li>
+                        <li>Dexterity: ${res.data.dex}</li>
+                        <li>Stealth: ${res.data.sth}</li>
+                        <li>Perception: ${res.data.per}</li>
+                    </ul>
+                    `
+                }
             }
             else {
                 switch (res.reason) {
