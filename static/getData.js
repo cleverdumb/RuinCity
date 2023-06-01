@@ -18,7 +18,16 @@ function getData(sec) {
             let res = JSON.parse(http.responseText);
             if (res.success) {
                 document.getElementById(sec).innerHTML = `
-                <p>Money: ${res.data.money}</p>`
+                <p>Money: ${res.data.money}</p>
+                <div style='width: 200px; height: 10px; border: 1px solid black;'>
+                    <div style='width: ${200*res.data.energy/res.data.maxEnergy}px; height: 100%; background-color: #5E9625'></div>
+                </div>
+                <div>${res.data.energy}/${res.data.maxEnergy}</div>
+                <div style='width: 200px; height: 10px; border: 1px solid black;'>
+                    <div style='width: ${200*res.data.health/res.data.maxHealth}px; height: 100%; background-color: #505BD3'></div>
+                </div>
+                <div>${res.data.health}/${res.data.maxHealth}</div>
+                `
             }
             else {
                 switch (res.reason) {
