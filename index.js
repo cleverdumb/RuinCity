@@ -86,6 +86,9 @@ function getSession(user, pass, res, ses) {
     if (!ses) {
         // console.log('normal case')
         let session = Math.round(Math.random()*3)+1;
+
+        // ! Change back (A larger random number)
+
         searchAll('session', {session: session}, (rows)=>{
             if (rows.length >= 1) {
                 getSession(user, pass, res, ses);
@@ -106,7 +109,7 @@ function getSession(user, pass, res, ses) {
                                 //     console.log(`Login - (session: ${ses})`)
                                 // }
                                 // else {
-                                    console.log(`Login - (user: ${user}, pass: ${pass})`.green)
+                                console.log(`Login - (user: ${user}, pass: ${pass})`.green)
                                 // }
                                 return
                             })
@@ -131,6 +134,9 @@ function getSession(user, pass, res, ses) {
     else {
         // console.log('session case');
         let session = Math.round(Math.random()*3+1);
+
+        // ! Change back (A larger random number)
+
         searchAll('session', {session: session}, (rows)=>{
             if (rows.length >= 1) {
                 getSession(user, pass, res, ses);

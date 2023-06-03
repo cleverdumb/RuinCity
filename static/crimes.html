@@ -33,7 +33,7 @@
         <script src='request.js'></script>
         <script src='setTimer.js'></script>
         <script>
-            getData('dispSec');
+            getData('dispSec', ['health','energy','money']);
 
             document.body.onload = ()=>{
                 let ret = getTimer('cTimers', 'timer');
