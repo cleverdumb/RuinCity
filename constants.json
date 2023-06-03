@@ -4,19 +4,59 @@
             "xpReq": 0,
             "failProb": 0.1,
             "xpGain": 1,
-            "cd": 5,
+            "cd": 120,
             "moneyGain": 10
         },
         {
             "xpReq": 15,
             "failProb": 0.1,
             "xpGain": 3,
-            "cd": 6,
+            "cd": 150,
             "moneyGain": 50
+        },
+        {
+            "xpReq": 80,
+            "failProb": 0.15,
+            "xpGain": 5,
+            "cd": 180,
+            "moneyGain": 100
+        },
+        {
+            "xpReq": 300,
+            "failProb": 0.15,
+            "xpGain": 10,
+            "cd": 210,
+            "moneyGain": 250
+        },
+        {
+            "xpReq": 1000,
+            "failProb": 0.2,
+            "xpGain": 25,
+            "cd": 240,
+            "moneyGain": 2000
+        },
+        {
+            "xpReq": 6000,
+            "failProb": 0.2,
+            "xpGain": 100,
+            "cd": 240,
+            "moneyGain": 7000
+        },
+        {
+            "xpReq": 24000,
+            "failProb": 0.2,
+            "xpGain": 3,
+            "cd": 240,
+            "moneyGain": 30000
         }
     ],
     "crimeNames": [
         "pickpocket",
-        "shoplifting"
+        "shoplifting",
+        "money counterfeiting",
+        "lock picking",
+        "burglary",
+        "drug transporting",
+        "art forgery"
     ]
 }
