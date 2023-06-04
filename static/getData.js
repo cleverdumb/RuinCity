@@ -57,3 +57,20 @@ function getData(sec, dataWanted=[]) {
         }
     }
 }
+
+function getCrimeRecord(sec) {
+    // console.log('running gcr')
+    request('/getCrimeRecord', '', true, 'POST', res=>{
+        // console.log('res');
+        // console.log(res);
+        if (res.success) {
+            let {data} = res;
+            let content = '<ul>';
+            data.forEach(x=>{
+                content += `<li>${x.name}: ${x.count}</li>`;
+            })
+            content += '</ul>';
+            document.getElementById(sec).innerHTML = content;
+        }
+    })
+}

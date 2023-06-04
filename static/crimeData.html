@@ -1,0 +1,18 @@
+<html>
+    <head>
+        <title>Ruin city crime data</title>
+    </head>
+    <body>
+        <h1>Crime data</h1>
+        <div id='sec'></div>
+        <a href='crimes.html'>Back to crimes</a>
+        <script src='request.js'></script>
+        <script src='getData.js'></script>
+        <script>
+            document.body.onload = ()=>{
+                // console.log('ok');
+                getCrimeRecord('sec');
+            }
+        </script>
+    </body>
+</html>

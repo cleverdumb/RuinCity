@@ -13,7 +13,7 @@ function request(path, params, session, method, cb) {
     // let params = 'type=basic'
     if (session) {
         if (localStorage.getItem('session') && (Date.now()-localStorage.getItem('time'))<12*60*60*1000) {
-            params += `&session=${localStorage.getItem('session')}`
+            params += `${params.length>0 ? '&' : ''}session=${localStorage.getItem('session')}`
         }
         else {
             window.location.replace(`${window.location.origin}/login.html`);

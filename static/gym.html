@@ -7,7 +7,9 @@
         <div id='dataSec'></div>
         <script src='getData.js'></script>
         <script>
-            getData('dataSec', ['money','energy','battleStats']);
+            document.body.onload = ()=>{
+                getData('dataSec', ['money','energy','battleStats']);
+            }
         </script>
     </body>
 </html>
