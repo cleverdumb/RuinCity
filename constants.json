@@ -53,9 +53,9 @@
     "crimeNames": [
         "pickpocket",
         "shoplifting",
-        "money counterfeiting",
         "lock picking",
         "burglary",
+        "money counterfeiting",
         "drug transporting",
         "art forgery"
     ]
