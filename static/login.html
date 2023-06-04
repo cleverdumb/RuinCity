@@ -19,7 +19,6 @@
                 let url = `${window.location.origin}/login`;
                 let params = '';
                 if (localStorage.getItem('session') && (Date.now()-localStorage.getItem('time'))<7200000) {
-                    // 2 days
                     params = `session=${localStorage.getItem('session')}`
                 }
                 else {

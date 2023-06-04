@@ -10,7 +10,6 @@
 function request(path, params, session, method, cb) {
     let http = new XMLHttpRequest();
     let url = `${window.location.origin}${path}`;
-    // let params = 'type=basic'
     if (session) {
         if (localStorage.getItem('session') && (Date.now()-localStorage.getItem('time'))<12*60*60*1000) {
             params += `${params.length>0 ? '&' : ''}session=${localStorage.getItem('session')}`

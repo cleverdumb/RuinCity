@@ -34,8 +34,6 @@
 
                 http.open('GET', url, true);
 
-                // http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-
                 http.onreadystatechange = ()=>{
                     if (http.readyState == 4 && http.status == 200) {
                         container.innerHTML = '';

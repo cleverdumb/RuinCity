@@ -47,7 +47,6 @@
                 x.onclick = () => {
                     request('/crime', `type=${x.getAttribute('crimeType')}`, true, 'POST', (res)=>{
                         if (res.success) {
-                            console.log('success');
                             getData('dispSec');
                             document.getElementById('errorMsg').innerText = 'Success';
                             setTimer({id: 'timer', timeMs: res.rem, delayMs: 0, finished: false});

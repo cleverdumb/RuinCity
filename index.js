@@ -8,7 +8,6 @@ const port = process.env.PORT || 2050;
 
 const db = new sqlite3.Database('./db/data.db')
 
-// const con = require('./../constants.json');
 const fs = require('fs');
 const con = JSON.parse(fs.readFileSync('./constants.json', 'utf-8'));
 
@@ -61,8 +60,6 @@ db.exec(`create table if not exists crimeRecord (
     c7 integer not null unique,
     foreign key (id) references account (id) on delete cascade on update cascade)`)
 
-// db.exec(`insert into account (user, pass) values ('a', '1')`)
-
 chatRecord = [];
 
 app.use(express.static('static'))
@@ -95,7 +92,6 @@ const searchAll = (table, data, cb) => {
 
 function getSession(user, pass, res, ses) {
     if (!ses) {
-        // console.log('normal case')
         let session = Math.round(Math.random()*3)+1;
 
         // ! Change back (A larger random number)
@@ -106,9 +102,7 @@ function getSession(user, pass, res, ses) {
                 return
             }
             else {
-                // console.log(user);
                 searchAll('account', {user: user}, (r)=>{
-                    // console.log(r)
                     let row = r[0];
                     let id = row.id;
                     searchAll('session', {id: id}, (rs)=>{
@@ -116,24 +110,14 @@ function getSession(user, pass, res, ses) {
                             db.run('update session set session=? where id=?', [session, id], (err)=>{
                                 if (err) throw err;
                                 res.send({success: true, session: session})
-                                // if (ses) {
-                                //     console.log(`Login - (session: ${ses})`)
-                                // }
-                                // else {
                                 console.log(`Login - (user: ${user}, pass: ${pass})`.green)
-                                // }
                                 return
                             })
                         }
                         else {
                             insertRow('session', {id: id, session: session}, ()=>{
                                 res.send({success: true, session: session})
-                                // if (session) {
-                                //     console.log(`Login - (session: ${ses})`)
-                                // }
-                                // else {
                                     console.log(`Login - (user: ${user}, pass: ${pass})`.green)
-                                // }
                                 return
                             })
                         }
@@ -143,7 +127,6 @@ function getSession(user, pass, res, ses) {
         })
     }
     else {
-        // console.log('session case');
         let session = Math.round(Math.random()*3+1);
 
         // ! Change back (A larger random number)
@@ -173,12 +156,9 @@ function fromSes(ses, cb) {
         cb(null);
     }
     else {
-        // console.log(ses);
         searchAll('session', {session: ses}, (rows)=>{
-            // console.log(rows);
             if (rows.length >= 1) {
                 let row = rows[0];
-                // console.log(row);
                 cb(row.id);
             }
             else {
@@ -198,10 +178,8 @@ app.post('/login',(req, res)=>{
     let body = req.body;
 
     if (body.session) {
-        // console.log('session in post')
         searchAll('session', {session: body.session}, (rows)=>{
             if (rows.length >= 1) {
-                // console.log('inside')
                 getSession(null, null, res, body.session)
                 return;
             }
@@ -220,9 +198,6 @@ app.post('/login',(req, res)=>{
 
     searchAll('account', {user: body.user, pass: body.pass}, (rows)=>{
         if (rows.length >= 1) {
-            // res.send({success: true, session: session})
-            // console.log(`Login - (user: ${body.user}, pass: ${body.pass}).green`)
-            // return
             getSession(body.user, body.pass, res, null);
         }
         else {
@@ -292,7 +267,6 @@ Error codes:
 
 app.post('/chat', (req,res) => {
     let body = req.body;
-    // console.log(body);
     let ses = body.session;
     fromSes(ses, (id)=> {
         if (id) {
@@ -305,7 +279,6 @@ app.post('/chat', (req,res) => {
                         if (chatRecord.length > 200) {
                             chatRecord.shift()
                         }
-                        // console.log(chatRecord);
                         res.send(JSON.stringify({success: true}))
                     }
                     else {
@@ -324,7 +297,6 @@ app.post('/chat', (req,res) => {
 })
 
 app.get('/getChat',(req, res)=>{
-    // console.log('get chat')
     res.send(JSON.stringify(chatRecord));
 })
 
@@ -466,7 +438,6 @@ Error codes:
 */
 
 app.post('/getCrimeRecord', (req,res)=>{
-    // console.log('got stuff')
     let {session} = req.body;
     fromSes(session, id=>{
         if (id) {
@@ -477,7 +448,6 @@ app.post('/getCrimeRecord', (req,res)=>{
                     for (let x=1; x<=7; x++) {
                         data.push({name: con.crimeNames[x-1], count: f[`c${x}`]})
                     }
-                    // console.log(data);
                     res.send(JSON.stringify({success: true, data: data}));
                 }
             })

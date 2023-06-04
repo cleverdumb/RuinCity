@@ -59,10 +59,7 @@ function getData(sec, dataWanted=[]) {
 }
 
 function getCrimeRecord(sec) {
-    // console.log('running gcr')
     request('/getCrimeRecord', '', true, 'POST', res=>{
-        // console.log('res');
-        // console.log(res);
         if (res.success) {
             let {data} = res;
             let content = '<ul>';
